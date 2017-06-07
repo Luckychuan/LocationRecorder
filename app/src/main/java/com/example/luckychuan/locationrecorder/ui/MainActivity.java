@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
         TabFragmentPagerAdapter adapter = new TabFragmentPagerAdapter(getSupportFragmentManager(),fragmentList);
         viewPager.setAdapter(adapter);
+        viewPager.setCurrentItem(1);
         tabLayout.setupWithViewPager(viewPager);
 
 
