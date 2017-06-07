@@ -1,20 +1,26 @@
-package com.example.luckychuan.locationrecorder;
+package com.example.luckychuan.locationrecorder.ui;
 
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import com.example.luckychuan.locationrecorder.R;
+import com.example.luckychuan.locationrecorder.adapter.TabFragmentPagerAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,9 +28,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
 
         //获取权限
         int readStorageCheck = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -35,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(MainActivity.this,
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
         }
+
+
 
     }
 
@@ -68,7 +76,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void afterPermissionGranted() {
-        Toast.makeText(this, "获取权限成功 ", Toast.LENGTH_SHORT).show();
+        initPages();
+    }
+
+    private void initPages() {
+        Fragment fragment1 = new DataFragment();
+        Fragment fragment2 = new RecordFragment();
+        Fragment fragment3 = new ButtonFragment();
+        List<Fragment> fragmentList = new ArrayList<>();
+        fragmentList.add(fragment1);
+        fragmentList.add(fragment2);
+        fragmentList.add(fragment3);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager_main);
+
+        TabFragmentPagerAdapter adapter = new TabFragmentPagerAdapter(getSupportFragmentManager(),fragmentList);
+        viewPager.setAdapter(adapter);
+        tabLayout.setupWithViewPager(viewPager);
+
+
+
+
     }
 
 
