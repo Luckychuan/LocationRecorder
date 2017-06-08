@@ -7,12 +7,12 @@ package com.example.luckychuan.locationrecorder.bean;
 public class DataBean {
 
     private String no;
-    private String id;
+    private String bssid;
     private String rssi;
 
     public DataBean(String no, String id, String rssi) {
         this.no = no;
-        this.id = id;
+        this.bssid = id;
         this.rssi = rssi;
     }
 
@@ -25,11 +25,11 @@ public class DataBean {
     }
 
     public String getId() {
-        return id;
+        return bssid;
     }
 
     public void setId(String id) {
-        this.id = id;
+        this.bssid = id;
     }
 
     public String getRssi() {
@@ -44,7 +44,7 @@ public class DataBean {
     public String toString() {
         return "DataBean{" +
                 "no='" + no + '\'' +
-                ", id='" + id + '\'' +
+                ", id='" + bssid + '\'' +
                 ", rssi='" + rssi + '\'' +
                 '}';
     }

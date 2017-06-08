@@ -1,8 +1,13 @@
 package com.example.luckychuan.locationrecorder.ui;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -12,6 +17,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -22,7 +28,12 @@ import com.example.luckychuan.locationrecorder.adapter.TabFragmentPagerAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SensorEventListener,OnTaskStartListener {
+
+    private SensorManager mSensorManager;
+    private RecordFragment mRecordFragment;
+    private DataFragment mDataFragment;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(MainActivity.this,
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
         }
-
 
 
     }
@@ -77,30 +87,54 @@ public class MainActivity extends AppCompatActivity {
 
     private void afterPermissionGranted() {
         initPages();
+
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        // 注册传感器，注册监听器
+        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), SensorManager.SENSOR_DELAY_UI);
     }
 
     private void initPages() {
-        Fragment fragment1 = new DataFragment();
-        Fragment fragment2 = new RecordFragment();
-        Fragment fragment3 = new ButtonFragment();
+        mDataFragment  = new DataFragment();
+        mRecordFragment = new RecordFragment();
+        mRecordFragment.setOnTaskStartListener(this);
+        ButtonFragment fragment3 = new ButtonFragment();
+        fragment3.setOnTaskStartListener(this);
+
         List<Fragment> fragmentList = new ArrayList<>();
-        fragmentList.add(fragment1);
-        fragmentList.add(fragment2);
+        fragmentList.add(mDataFragment);
+        fragmentList.add(mRecordFragment);
         fragmentList.add(fragment3);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager_main);
 
-        TabFragmentPagerAdapter adapter = new TabFragmentPagerAdapter(getSupportFragmentManager(),fragmentList);
+        TabFragmentPagerAdapter adapter = new TabFragmentPagerAdapter(getSupportFragmentManager(), fragmentList);
         viewPager.setAdapter(adapter);
         viewPager.setCurrentItem(1);
         tabLayout.setupWithViewPager(viewPager);
 
+    }
 
 
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        float currentDirection = sensorEvent.values[0];
+        //保留一位小数
+        currentDirection = (float) (Math.round(currentDirection * 10)) / 10;
+        mRecordFragment.setDirectionText(currentDirection + "");
 
     }
 
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mSensorManager.unregisterListener(this);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -123,4 +157,34 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onRefresh() {
+        Log.d("ui_debug", "onRefresh: ");
+    }
+
+    @Override
+    public void onButtonClick() {
+        int number = mRecordFragment.getCurrentNumber();
+        Log.d("ui_debug", "onButtonClick: "+number);
+        if(number!=0){
+            testRequest(number);
+        }else{
+            Toast.makeText(this, "输入正确的格子数", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void testRequest(int number){
+        testResult();
+    }
+
+    public void testResult(){
+        mDataFragment.setText("结果");
+    }
+
+}
+
+interface OnTaskStartListener{
+    void onRefresh();
+    void onButtonClick();
 }

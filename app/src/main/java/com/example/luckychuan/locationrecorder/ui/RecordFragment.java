@@ -1,6 +1,11 @@
 package com.example.luckychuan.locationrecorder.ui;
 
+import android.content.Context;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.annotation.Nullable;
@@ -36,7 +41,7 @@ public class RecordFragment extends Fragment {
             "6c:3b:6b:6a:68:0e",
             "6c:3b:6b:68:9a:47",
             "6c:3b:6b:66:28:11"};
-    private static final String[] ID = new String[]{"1", "2", "3", "4", "5", "6", "7"};
+    private static final String[] BSSID = new String[]{"1", "2", "3", "4", "5", "6", "7"};
 
     private SwipeRefreshLayout mRefreshLayout;
     private EditText mEditText;
@@ -44,21 +49,33 @@ public class RecordFragment extends Fragment {
     private SimpleAdapter mAdapter;
     private TextView mNumberTextView;
     private TextView mDirectionTextView;
-    private Button mButton;
     //SimpleAdapter使用的数据集
     private List<HashMap<String, String>> mList;
+
+
+    private OnTaskStartListener mListener;
+
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view= inflater.inflate(R.layout.fragment_record, container, false);
+        View view = inflater.inflate(R.layout.fragment_record, container, false);
 
         mRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.refresh_layout);
         mEditText = (EditText) view.findViewById(R.id.edit_text);
+        mEditText.setText("1");
         mListView = (ListView) view.findViewById(R.id.listView);
         mNumberTextView = (TextView) view.findViewById(R.id.textView_ap_number);
         mDirectionTextView = (TextView) view.findViewById(R.id.textView_direction);
-        mButton = (Button) view.findViewById(R.id.button_small);
+        Button button = (Button) view.findViewById(R.id.button_small);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.onButtonClick();
+                }
+            }
+        });
 
         return view;
     }
@@ -71,24 +88,23 @@ public class RecordFragment extends Fragment {
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                //// TODO: 2017/6/7
+                if (mListener != null) {
+                    mListener.onRefresh();
+                }
             }
         });
-        
+
         mList = new ArrayList<>();
         mAdapter = new SimpleAdapter(getContext(), mList,
-                R.layout.rssi_item, new String[]{"no", "id", "rssi"},
-                new int[]{R.id.textView_no, R.id.textView_id, R.id.textView_rssi});
+                R.layout.rssi_item, new String[]{"no", "bssid", "rssi"},
+                new int[]{R.id.textView_no, R.id.textView_bssid, R.id.textView_rssi});
         mListView.setAdapter(mAdapter);
         test();
-        
-        mButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // TODO: 2017/6/8  
-            }
-        });
-        
+
+    }
+
+    public void setOnTaskStartListener(OnTaskStartListener listener) {
+        mListener = listener;
     }
 
 
@@ -96,11 +112,37 @@ public class RecordFragment extends Fragment {
         for (int i = 0; i < 7; i++) {
             HashMap<String, String> map = new HashMap<>();
             map.put("no", (i + 1) + "");
-            map.put("id", "6c:3b:6b:44:32:d3");
+            map.put("bssid", "6c:3b:6b:44:32:d3");
             map.put("rssi", "-53");
             mList.add(map);
         }
         mAdapter.notifyDataSetChanged();
     }
+
+    public void setDirectionText(String text) {
+        mDirectionTextView.setText(text);
+    }
+
+    public void onRefreshFinish(List<DataBean> list) {
+        mList.clear();
+        for (DataBean dataBean : list) {
+            HashMap<String, String> map = new HashMap<>();
+            map.put("no", dataBean.getNo());
+            map.put("bssid", dataBean.getId());
+            map.put("rssi", dataBean.getRssi());
+            mList.add(map);
+            mRefreshLayout.setRefreshing(false);
+        }
+
+    }
+
+    public int getCurrentNumber() {
+        if(!mEditText.getText().toString().equals("")){
+            return Integer.valueOf(mEditText.getText().toString());
+        }else{
+            return 0;
+        }
+    }
+
 
 }
