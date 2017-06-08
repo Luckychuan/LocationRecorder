@@ -3,4 +3,10 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <Button
+        android:id="@+id/button_large"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="开始记录当前格子"/>
+
 </LinearLayout>

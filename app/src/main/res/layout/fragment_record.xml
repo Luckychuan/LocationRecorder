@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    >
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/refresh_layout"
@@ -34,7 +34,7 @@
                         android:textSize="18sp" />
 
                     <TextView
-                        android:id="@+id/tvCount"
+                        android:id="@+id/textView_ap_number"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="16dp"
@@ -55,11 +55,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="center"
-                        android:text="当前角度:"
+                        android:text="当前角度："
                         android:textSize="18sp" />
 
                     <TextView
-                        android:id="@+id/tvDegree"
+                        android:id="@+id/textView_direction"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="16dp"
@@ -93,9 +93,17 @@
 
             <ListView
                 android:id="@+id/listView"
+                android:layout_weight="1"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="0dp"
                 android:layout_below="@+id/linearLayout" />
+
+            <Button
+                android:layout_marginTop="16dp"
+                android:id="@+id/button_small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="开始记录当前格子"/>
 
 
 
