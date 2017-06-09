@@ -61,7 +61,9 @@ public class GetDataModelImpl implements GetDataModel {
         mContext.unregisterReceiver(mWifiReceiver);
     }
 
-
+    /**
+     * 获得wifi数据
+     */
     class WifiReceiver extends BroadcastReceiver {
 
         @Override
@@ -81,6 +83,7 @@ public class GetDataModelImpl implements GetDataModel {
                 List<WifiData> list = new ArrayList<>();
                 for (ScanResult tmp : scanResults) {
 //                    if (tmp.SSID.equals("EXP_AP")) {
+                    // TODO: 2017/6/9  
                         WifiData wifiData = new WifiData();
                         wifiData.setId(tmp.BSSID);
                         String no = mDefaultWifiMap.get(tmp.BSSID);
