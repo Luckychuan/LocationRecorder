@@ -1,13 +1,7 @@
 package com.example.luckychuan.locationrecorder.ui;
 
-import android.content.Context;
 import android.graphics.Color;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -21,7 +15,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.example.luckychuan.locationrecorder.R;
-import com.example.luckychuan.locationrecorder.bean.DataBean;
+import com.example.luckychuan.locationrecorder.bean.WifiData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,15 +27,6 @@ import java.util.List;
 
 public class RecordFragment extends Fragment {
 
-    private static final String[] NO = new String[]{
-            "6c:3b:6b:44:32:d3",
-            "6c:3b:6b:48:bd:ad",
-            "6c:3b:6b:48:c0:5f",
-            "6c:3b:6b:48:c3:3e",
-            "6c:3b:6b:6a:68:0e",
-            "6c:3b:6b:68:9a:47",
-            "6c:3b:6b:66:28:11"};
-    private static final String[] BSSID = new String[]{"1", "2", "3", "4", "5", "6", "7"};
 
     private SwipeRefreshLayout mRefreshLayout;
     private EditText mEditText;
@@ -99,7 +84,7 @@ public class RecordFragment extends Fragment {
                 R.layout.rssi_item, new String[]{"no", "bssid", "rssi"},
                 new int[]{R.id.textView_no, R.id.textView_bssid, R.id.textView_rssi});
         mListView.setAdapter(mAdapter);
-        test();
+//        test();
 
     }
 
@@ -120,19 +105,22 @@ public class RecordFragment extends Fragment {
     }
 
     public void setDirectionText(String text) {
-        mDirectionTextView.setText(text);
+        if(mDirectionTextView !=null ){
+            mDirectionTextView.setText(text);
+        }
     }
 
-    public void onRefreshFinish(List<DataBean> list) {
+    public void onRefreshFinish(List<WifiData> list) {
         mList.clear();
-        for (DataBean dataBean : list) {
+        for (WifiData dataBean : list) {
             HashMap<String, String> map = new HashMap<>();
             map.put("no", dataBean.getNo());
             map.put("bssid", dataBean.getId());
             map.put("rssi", dataBean.getRssi());
             mList.add(map);
-            mRefreshLayout.setRefreshing(false);
         }
+        mRefreshLayout.setRefreshing(false);
+        mAdapter.notifyDataSetChanged();
 
     }
 

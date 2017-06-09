@@ -24,15 +24,20 @@ import android.widget.Toast;
 
 import com.example.luckychuan.locationrecorder.R;
 import com.example.luckychuan.locationrecorder.adapter.TabFragmentPagerAdapter;
+import com.example.luckychuan.locationrecorder.bean.WifiData;
+import com.example.luckychuan.locationrecorder.mvp.DataView;
+import com.example.luckychuan.locationrecorder.mvp.GetDataPresenter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener,OnTaskStartListener {
+public class MainActivity extends AppCompatActivity implements SensorEventListener,OnTaskStartListener,DataView {
 
     private SensorManager mSensorManager;
     private RecordFragment mRecordFragment;
     private DataFragment mDataFragment;
+
+    private GetDataPresenter mPresenter;
 
 
     @Override
@@ -113,6 +118,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         viewPager.setCurrentItem(1);
         tabLayout.setupWithViewPager(viewPager);
 
+        mPresenter = new GetDataPresenter(this,this);
+        mPresenter.requestRefresh();
+
     }
 
 
@@ -133,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mPresenter.detach();
         mSensorManager.unregisterListener(this);
     }
 
@@ -161,6 +170,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onRefresh() {
         Log.d("ui_debug", "onRefresh: ");
+        mPresenter.requestRefresh();
+
     }
 
     @Override
@@ -182,6 +193,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mDataFragment.setText("结果");
     }
 
+    @Override
+    public void onRefreshSuccess(List<WifiData> list) {
+        mRecordFragment.onRefreshFinish(list);
+    }
+
+    @Override
+    public void onRefreshFail(String failMsg) {
+
+    }
 }
 
 interface OnTaskStartListener{

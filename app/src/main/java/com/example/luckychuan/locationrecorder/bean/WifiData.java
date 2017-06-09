@@ -4,17 +4,19 @@ package com.example.luckychuan.locationrecorder.bean;
  * Created by Luckychuan on 2017/6/7.
  */
 
-public class DataBean {
+public class WifiData {
 
     private String no;
     private String bssid;
     private String rssi;
 
-    public DataBean(String no, String id, String rssi) {
+    public WifiData(String no, String id, String rssi) {
         this.no = no;
         this.bssid = id;
         this.rssi = rssi;
     }
+
+    public WifiData(){}
 
     public String getNo() {
         return no;
