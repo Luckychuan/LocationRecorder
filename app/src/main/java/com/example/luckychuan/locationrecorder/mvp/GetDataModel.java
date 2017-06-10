@@ -2,6 +2,7 @@ package com.example.luckychuan.locationrecorder.mvp;
 
 import android.content.Context;
 
+import com.example.luckychuan.locationrecorder.bean.DataResult;
 import com.example.luckychuan.locationrecorder.bean.WifiData;
 
 import java.util.List;
@@ -12,13 +13,16 @@ import java.util.List;
 
 public interface GetDataModel {
 
-    void refreshAP(Callback callback);
+    void refreshAP(Callback<List<WifiData>> callback);
+
     void onPresenterDetach();
-//    void record(String directionString, );
+
+    void record(int number, String directionString, Callback<List<DataResult>> callback);
 
 
-    interface Callback {
-        void onSuccess(List<WifiData> list);
+    interface Callback<T> {
+        void onSuccess(T result);
+
         void onFail(String failMsg);
 
     }

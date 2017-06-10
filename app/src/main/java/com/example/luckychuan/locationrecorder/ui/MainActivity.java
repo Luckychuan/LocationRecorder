@@ -1,6 +1,9 @@
 package com.example.luckychuan.locationrecorder.ui;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -24,6 +27,7 @@ import android.widget.Toast;
 
 import com.example.luckychuan.locationrecorder.R;
 import com.example.luckychuan.locationrecorder.adapter.TabFragmentPagerAdapter;
+import com.example.luckychuan.locationrecorder.bean.DataResult;
 import com.example.luckychuan.locationrecorder.bean.WifiData;
 import com.example.luckychuan.locationrecorder.mvp.DataView;
 import com.example.luckychuan.locationrecorder.mvp.GetDataPresenter;
@@ -31,13 +35,17 @@ import com.example.luckychuan.locationrecorder.mvp.GetDataPresenter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener,OnTaskStartListener,DataView {
+public class MainActivity extends AppCompatActivity implements SensorEventListener, OnTaskStartListener, DataView {
 
     private SensorManager mSensorManager;
+    private NotificationManager mNotificationManager;
+
     private RecordFragment mRecordFragment;
     private DataFragment mDataFragment;
 
     private GetDataPresenter mPresenter;
+
+    private ProgressDialog mProgressDialog;
 
 
     @Override
@@ -96,10 +104,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         // 注册传感器，注册监听器
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), SensorManager.SENSOR_DELAY_UI);
+
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
     }
 
     private void initPages() {
-        mDataFragment  = new DataFragment();
+        mDataFragment = new DataFragment();
         mRecordFragment = new RecordFragment();
         mRecordFragment.setOnTaskStartListener(this);
         ButtonFragment fragment3 = new ButtonFragment();
@@ -118,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         viewPager.setCurrentItem(1);
         tabLayout.setupWithViewPager(viewPager);
 
-        mPresenter = new GetDataPresenter(this,this);
+        mPresenter = new GetDataPresenter(this, this);
         mPresenter.requestRefresh();
 
     }
@@ -176,22 +187,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onButtonClick() {
+
+        mNotificationManager.cancel(1);
+
         int number = mRecordFragment.getCurrentNumber();
-        Log.d("ui_debug", "onButtonClick: "+number);
-        if(number!=0){
-            testRequest(number);
-        }else{
+        String directionString = mRecordFragment.getDirectionText();
+        Log.d("ui_debug", "onButtonClick: " + number);
+        if (number != 0) {
+            mPresenter.requestRecord(number, directionString);
+        } else {
             Toast.makeText(this, "输入正确的格子数", Toast.LENGTH_SHORT).show();
         }
     }
 
-    public void testRequest(int number){
-        testResult();
-    }
-
-    public void testResult(){
-        mDataFragment.setText("结果");
-    }
 
     @Override
     public void onRefreshSuccess(List<WifiData> list) {
@@ -200,11 +208,51 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onRefreshFail(String failMsg) {
+        Toast.makeText(this, failMsg, Toast.LENGTH_SHORT).show();
+    }
 
+    @Override
+    public void showProgressDialog() {
+        mProgressDialog = ProgressDialog.show(this, "扫描和记录", "正在扫描和记录第 " + mRecordFragment.getCurrentNumber() + " 格子");
+    }
+
+    @Override
+    public void showFailDialog(String failMsg) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("失败");
+        builder.setMessage(failMsg);
+        builder.setCancelable(true);
+        builder.setNeutralButton("确定", null);
+        builder.show();
+
+    }
+
+    @Override
+    public void onRecordSuccess(List<DataResult> list) {
+        mRecordFragment.plusOneCurrentNumber();
+        DataResult dataResult = list.get(list.size() - 1);
+        mRecordFragment.onRefreshFinish(dataResult.getList());
+        for (DataResult result : list) {
+            mDataFragment.setText(result.toString());
+        }
+    }
+
+    @Override
+    public void showNotification() {
+        Notification.Builder builder = new Notification.Builder(this);
+        builder.setDefaults(Notification.DEFAULT_ALL);
+        builder.setSmallIcon(R.mipmap.ic_launcher);
+        mNotificationManager.notify(1, builder.build());
+    }
+
+    @Override
+    public void hideProgressDialog() {
+        mProgressDialog.hide();
     }
 }
 
-interface OnTaskStartListener{
+interface OnTaskStartListener {
     void onRefresh();
+
     void onButtonClick();
 }

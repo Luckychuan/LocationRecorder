@@ -96,21 +96,28 @@ public class RecordFragment extends Fragment {
     }
 
 
-    private void test() {
-        for (int i = 0; i < 7; i++) {
-            HashMap<String, String> map = new HashMap<>();
-            map.put("no", (i + 1) + "");
-            map.put("bssid", "6c:3b:6b:44:32:d3");
-            map.put("rssi", "-53");
-            mList.add(map);
-        }
-        mAdapter.notifyDataSetChanged();
-    }
+//    private void test() {
+//        for (int i = 0; i < 7; i++) {
+//            HashMap<String, String> map = new HashMap<>();
+//            map.put("no", (i + 1) + "");
+//            map.put("bssid", "6c:3b:6b:44:32:d3");
+//            map.put("rssi", "-53");
+//            mList.add(map);
+//        }
+//        mAdapter.notifyDataSetChanged();
+//    }
 
     public void setDirectionText(String text) {
-        if(mDirectionTextView !=null ){
+        if (mDirectionTextView != null) {
             mDirectionTextView.setText(text);
         }
+    }
+
+    public String getDirectionText() {
+        if (mDirectionTextView != null) {
+            return mDirectionTextView.getText().toString();
+        }
+        return "";
     }
 
     public void onRefreshFinish(List<WifiData> list) {
@@ -128,11 +135,17 @@ public class RecordFragment extends Fragment {
     }
 
     public int getCurrentNumber() {
-        if(!mEditText.getText().toString().equals("")){
+        if (!mEditText.getText().toString().equals("")) {
             return Integer.valueOf(mEditText.getText().toString());
-        }else{
+        } else {
             return 0;
         }
+    }
+
+    public void plusOneCurrentNumber() {
+        int currentNumber = Integer.valueOf(mEditText.getText().toString());
+        currentNumber++;
+        mEditText.setText(currentNumber + "");
     }
 
 

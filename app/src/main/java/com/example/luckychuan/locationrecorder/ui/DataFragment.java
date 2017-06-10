@@ -24,7 +24,7 @@ public class DataFragment extends Fragment implements View.OnClickListener {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view =inflater.inflate(R.layout.fragment_data,container,false);
+        View view = inflater.inflate(R.layout.fragment_data, container, false);
 
         mEditText = (EditText) view.findViewById(R.id.edit_data);
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.floatActionButton);
@@ -43,8 +43,9 @@ public class DataFragment extends Fragment implements View.OnClickListener {
 
     }
 
-    public void setText(String text){
+    public void setText(String text) {
         mDataString += text;
+        mDataString += "\n";
         mEditText.setText(mDataString);
     }
 

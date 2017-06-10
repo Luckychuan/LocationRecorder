@@ -2,6 +2,7 @@ package com.example.luckychuan.locationrecorder.mvp;
 
 import android.content.Context;
 
+import com.example.luckychuan.locationrecorder.bean.DataResult;
 import com.example.luckychuan.locationrecorder.bean.WifiData;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public class GetDataPresenter {
 
-    private GetDataModel mModel;
+    private GetDataModelImpl mModel;
     private DataView mView;
 
     public GetDataPresenter(DataView view, Context context){
@@ -21,15 +22,35 @@ public class GetDataPresenter {
     }
 
     public void requestRefresh(){
-        mModel.refreshAP(new GetDataModel.Callback() {
+        mModel.refreshAP(new GetDataModel.Callback<List<WifiData>>() {
             @Override
-            public void onSuccess(List<WifiData> list) {
-                mView.onRefreshSuccess(list);
+            public void onSuccess(List<WifiData> result) {
+                mModel.onRefreshFinish();
+                mView.onRefreshSuccess(result);
             }
 
             @Override
             public void onFail(String failMsg) {
                 mView.onRefreshFail(failMsg);
+            }
+        });
+    }
+
+    public void requestRecord(int number, String directionString){
+        mView.showProgressDialog();
+        mModel.record(number, directionString, new GetDataModel.Callback<List<DataResult>>() {
+            @Override
+            public void onSuccess(List<DataResult> result) {
+                mView.onRecordSuccess(result);
+                mView.hideProgressDialog();
+                mView.showNotification();
+            }
+
+            @Override
+            public void onFail(String failMsg) {
+                mView.hideProgressDialog();
+                mView.showNotification();
+                mView.showFailDialog(failMsg);
             }
         });
     }
