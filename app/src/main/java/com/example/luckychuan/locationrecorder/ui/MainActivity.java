@@ -171,11 +171,28 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.update_log) {
+            showUpdateLogDialog();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showUpdateLogDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("更新日志");
+        builder.setMessage("Version 1.0.0 Beta\n" +
+                "\n" +
+                "1.改进：大幅度优化软件性能\n" +
+                "2.新功能：全新的用户界面\n" +
+                "3.新功能：一整屏幕的大按钮\n" +
+                "4.新功能：扫描并记录时弹出进度对话框\n" +
+                "5.新功能：AP掉线时自动停止该格子的记录\n" +
+                "6.新功能：可在软件中查看编辑数据\n" +
+                "7.新功能：一键保存txt文件并分享到QQ好友");
+        builder.setCancelable(true);
+        builder.show();
     }
 
     @Override
