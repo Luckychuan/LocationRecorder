@@ -124,12 +124,13 @@ public class RecordFragment extends Fragment {
         mList.clear();
         for (WifiData dataBean : list) {
             HashMap<String, String> map = new HashMap<>();
-            map.put("no", dataBean.getNo());
+            map.put("no", dataBean.getNo()+"");
             map.put("bssid", dataBean.getId());
             map.put("rssi", dataBean.getRssi());
             mList.add(map);
         }
         mRefreshLayout.setRefreshing(false);
+        mNumberTextView.setText(list.size()+"");
         mAdapter.notifyDataSetChanged();
 
     }

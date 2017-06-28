@@ -17,8 +17,8 @@ public interface DataView {
 
     //记录数据
     void showProgressDialog();
-    void showFailDialog(String failMsg);
     void onRecordSuccess(List<DataResult> list);
+    void onRecordFail(String failMsg);
     void showNotification();
     void hideProgressDialog();
 

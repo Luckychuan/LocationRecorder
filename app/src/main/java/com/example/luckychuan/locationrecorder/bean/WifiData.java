@@ -4,27 +4,40 @@ package com.example.luckychuan.locationrecorder.bean;
  * Created by Luckychuan on 2017/6/7.
  */
 
-public class WifiData {
+public class WifiData implements Comparable<WifiData> {
 
-    private String no;
+    private int no;
     private String bssid;
     private String rssi;
 
-    public WifiData(String no, String id, String rssi) {
-        this.no = no;
-        this.bssid = id;
-        this.rssi = rssi;
-    }
 
-    public WifiData(){}
-
-    public String getNo() {
+    public int getNo() {
         return no;
     }
 
-    public void setNo(String no) {
+    public void setNo(int no) {
         this.no = no;
     }
+
+    public String getBssid() {
+        return bssid;
+    }
+
+    public void setBssid(String bssid) {
+        this.bssid = bssid;
+    }
+
+    public WifiData(int no, String bssid, String rssi) {
+
+        this.no = no;
+        this.bssid = bssid;
+        this.rssi = rssi;
+    }
+
+    public WifiData() {
+    }
+
+
 
     public String getId() {
         return bssid;
@@ -49,5 +62,10 @@ public class WifiData {
                 ", id='" + bssid + '\'' +
                 ", rssi='" + rssi + '\'' +
                 '}';
+    }
+
+    @Override
+    public int compareTo(WifiData wifiData) {
+        return Integer.valueOf(no).compareTo(wifiData.getNo());
     }
 }

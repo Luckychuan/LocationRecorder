@@ -48,11 +48,13 @@ public class GetDataPresenter {
 
             @Override
             public void onFail(String failMsg) {
-                mView.hideProgressDialog();
-                mView.showNotification();
-                mView.showFailDialog(failMsg);
+                mView.onRecordFail(failMsg);
             }
         });
+    }
+
+    public void cancelRecord(){
+        mModel.cancelRecord();
     }
 
     public void detach(){

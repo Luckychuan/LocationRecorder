@@ -12,6 +12,8 @@ import com.example.luckychuan.locationrecorder.bean.DataResult;
 import com.example.luckychuan.locationrecorder.bean.WifiData;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,8 +23,8 @@ public class GetDataModelImpl implements GetDataModel, GetDataModel.Callback<Lis
 
     private static final String TAG = "GetDataModelImpl";
 
-    //测试硬件上的 bssid和路由器序号
-    private Map<String, String> mDefaultWifiMap;
+    //测试路由器上的 bssid
+    private List<String> mBssidList;
 
 
     private WifiManager mWifiManager;
@@ -32,6 +34,7 @@ public class GetDataModelImpl implements GetDataModel, GetDataModel.Callback<Lis
 
     private Callback<List<WifiData>> mRefreshCallback;
 
+    private boolean mIsCancel;
     //记录扫描的次数
     private int mCount = 0;
     private Callback<List<DataResult>> mRecordCallback;
@@ -49,14 +52,15 @@ public class GetDataModelImpl implements GetDataModel, GetDataModel.Callback<Lis
     }
 
     private void initMap() {
-        mDefaultWifiMap = new HashMap<>();
-        mDefaultWifiMap.put("6c:3b:6b:44:32:d3", "1");
-        mDefaultWifiMap.put("6c:3b:6b:48:bd:ad", "2");
-        mDefaultWifiMap.put("6c:3b:6b:48:c0:5f", "3");
-        mDefaultWifiMap.put("6c:3b:6b:48:c3:3e", "4");
-        mDefaultWifiMap.put("6c:3b:6b:6a:68:0e", "5");
-        mDefaultWifiMap.put("6c:3b:6b:68:9a:47", "6");
-        mDefaultWifiMap.put("6c:3b:6b:66:28:11", "7");
+        mBssidList = new ArrayList<>();
+        mBssidList.add("6c:3b:6b:44:32:d3");
+        mBssidList.add("6c:3b:6b:48:bd:ad");
+        mBssidList.add("6c:3b:6b:48:c0:5f");
+        mBssidList.add("6c:3b:6b:48:c3:3e");
+        mBssidList.add("6c:3b:6b:6a:68:0e");
+        mBssidList.add("6c:3b:6b:68:9a:47");
+        mBssidList.add("6c:3b:6b:66:28:11");
+
     }
 
     @Override
@@ -78,6 +82,7 @@ public class GetDataModelImpl implements GetDataModel, GetDataModel.Callback<Lis
 
     @Override
     public void record(int number, String directionString, Callback<List<DataResult>> callback) {
+        mIsCancel = false;
         mRecordCallback = callback;
         mDataResultList = new ArrayList<>();
         for (int i = 1; i <= 3; i++) {
@@ -98,6 +103,10 @@ public class GetDataModelImpl implements GetDataModel, GetDataModel.Callback<Lis
         mDataResultList = null;
     }
 
+    public void cancelRecord(){
+        mIsCancel = true;
+    }
+
     /**
      * 实现GetDataModel.Callback<List<WifiData>>接口
      * 当扫描一次结束时的回调
@@ -110,33 +119,36 @@ public class GetDataModelImpl implements GetDataModel, GetDataModel.Callback<Lis
 
         Log.d("record", "第 " + mCount + " 次扫描结束");
 
-        if (result.size() < mDefaultWifiMap.size()) {
-            mRecordCallback.onFail("由于AP掉线了，记录终止，请重新记录该格子");
-            onRecordFinish();
-        } else {
 
-            //扫描的次数为2，3，4时记录数据
-            if (mCount != 1) {
-                int position = mCount - 2;
-                DataResult dataResult = mDataResultList.get(position);
-                dataResult.setList(result);
-                dataResult.setTime(System.currentTimeMillis());
+       if(!mIsCancel){
 
-            }
+           //扫描的次数为2，3，4时记录数据
+           if (mCount != 1) {
+               int position = mCount - 2;
+               DataResult dataResult = mDataResultList.get(position);
+               dataResult.setList(result);
+               dataResult.setTime(System.currentTimeMillis());
 
-            if (mCount == 4) {
-                //完成当前格子数的测试
-                mRecordCallback.onSuccess(mDataResultList);
-                onRecordFinish();
-                return;
-            }
+           }
+
+           if (mCount == 4) {
+               //完成当前格子数的测试
+               mRecordCallback.onSuccess(mDataResultList);
+               onRecordFinish();
+               return;
+           }
 
 
-            mCount++;
-            Log.d("record", "第 " + mCount + " 次扫描开始");
-            refreshAP(this);
+           mCount++;
+           Log.d("record", "第 " + mCount + " 次扫描开始");
+           refreshAP(this);
 
-        }
+       }else{
+           mRecordCallback.onFail("任务取消");
+           onRecordFinish();
+       }
+
+
     }
 
     @Override
@@ -168,16 +180,15 @@ public class GetDataModelImpl implements GetDataModel, GetDataModel.Callback<Lis
                     if (tmp.SSID.equals("EXP_AP")) {
                         WifiData wifiData = new WifiData();
                         wifiData.setId(tmp.BSSID);
-                        String no = mDefaultWifiMap.get(tmp.BSSID);
-                        if (no != null) {
-                            wifiData.setNo(no);
-                        } else {
-                            wifiData.setNo("0");
-                        }
+                        int no = mBssidList.indexOf(tmp.BSSID) + 1;
+                        wifiData.setNo(no);
                         wifiData.setRssi(tmp.level + "");
                         list.add(wifiData);
                     }
                 }
+
+                Collections.sort(list);
+
 
                 //回调数据
                 if (mRefreshCallback != null) {

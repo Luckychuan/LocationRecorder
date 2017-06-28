@@ -47,14 +47,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private ProgressDialog mProgressDialog;
 
+    private Toolbar mToolbar ;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
 
         //获取权限
         int readStorageCheck = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -190,7 +192,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 "4.新功能：扫描并记录时弹出进度对话框\n" +
                 "5.新功能：AP掉线时自动停止该格子的记录\n" +
                 "6.新功能：可在软件中查看编辑数据\n" +
-                "7.新功能：一键保存txt文件并分享到QQ好友");
+                "7.新功能：一键保存txt文件并分享到QQ好友" +"\n" +
+                "\n" +
+                "Version 1.1.0 Beta\n" +
+                "\n" +
+                "1.改进：去除AP掉线时终止记录\n" +
+                "2.修复：AP数量不显示\n" +
+                "3.改进：对搜索到的Wifi数据从小到大排序"+"更新日志\n" +
+                "\n" +
+                "Version 1.2.0 \n" +
+                "\n" +
+                "1.改进：优化界面\n" +
+                "2.改进：标题显示AP数量\n" +
+                "3.新功能：支持点击返回键中断记录");
         builder.setCancelable(true);
         builder.show();
     }
@@ -221,6 +235,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onRefreshSuccess(List<WifiData> list) {
         mRecordFragment.onRefreshFinish(list);
+        mToolbar.setTitle("AP数量："+list.size());
     }
 
     @Override
@@ -231,17 +246,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void showProgressDialog() {
         mProgressDialog = ProgressDialog.show(this, "扫描和记录", "正在扫描和记录第 " + mRecordFragment.getCurrentNumber() + " 格子");
-    }
-
-    @Override
-    public void showFailDialog(String failMsg) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("失败");
-        builder.setMessage(failMsg);
-        builder.setCancelable(true);
-        builder.setNeutralButton("确定", null);
-        builder.show();
-
+        mProgressDialog.setCancelable(true);
+        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialogInterface) {
+                mPresenter.cancelRecord();
+            }
+        });
     }
 
     @Override
@@ -249,9 +260,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mRecordFragment.plusOneCurrentNumber();
         DataResult dataResult = list.get(list.size() - 1);
         mRecordFragment.onRefreshFinish(dataResult.getList());
+        mToolbar.setTitle("AP数量："+dataResult.getList().size());
         for (DataResult result : list) {
             mDataFragment.setText(result.toString());
         }
+    }
+
+    @Override
+    public void onRecordFail(String failMsg) {
+        Toast.makeText(MainActivity.this, failMsg, Toast.LENGTH_SHORT).show();
+
     }
 
     @Override
