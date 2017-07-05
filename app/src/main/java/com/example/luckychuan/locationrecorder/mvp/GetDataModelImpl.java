@@ -56,7 +56,7 @@ public class GetDataModelImpl implements GetDataModel, GetDataModel.Callback<Lis
         mBssidList.add("6c:3b:6b:44:32:d3");
         mBssidList.add("6c:3b:6b:48:bd:ad");
         mBssidList.add("6c:3b:6b:48:c0:5f");
-        mBssidList.add("6c:3b:6b:48:c3:3e");
+        mBssidList.add("6c:3b:6b:68:9a:6a");
         mBssidList.add("6c:3b:6b:6a:68:0e");
         mBssidList.add("6c:3b:6b:68:9a:47");
         mBssidList.add("6c:3b:6b:66:28:11");
